@@ -34,11 +34,11 @@ The biggest gain came from the cheapest change. Letting any query word match too
 
 ## How it works
 
-- **Front end:** two plain HTML pages with no framework and no build step.
-- **Server:** Node and Express. It builds a BM25 index in memory at start-up and compares embeddings by brute force.
-- **Embeddings:** Universal Sentence Encoder, shipped inside an npm package. It runs on the server, so there is no API key and no per-query cost.
-- **Data:** the catalog, queries, labels and product embeddings live in `/data` and are built by `scripts/build-data.mjs`.
-- **Scoring:** `scripts/train.mjs` tunes the blend on train queries. `scripts/evaluate.mjs` scores everything and writes the file the scorecard reads.
+- Front end: two plain HTML pages with no framework and no build step.
+- Server: Node and Express. It builds a BM25 index in memory at start-up and compares embeddings by brute force.
+- Embeddings: Universal Sentence Encoder, shipped inside an npm package. It runs on the server, so there is no API key and no per-query cost.
+- Data: the catalog, queries, labels and product embeddings live in `/data` and are built by `scripts/build-data.mjs`.
+- Scoring: `scripts/train.mjs` tunes the blend on train queries. `scripts/evaluate.mjs` scores everything and writes the file the scorecard reads.
 
 ## Run it locally
 

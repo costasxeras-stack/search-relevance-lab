@@ -6,9 +6,9 @@ Relevance debates tend to run on anecdotes. Someone types a query, dislikes the 
 
 ## Users
 
-- **Search product managers** who need to explain to stakeholders what a ranking change is worth.
-- **Hiring managers and interviewers** who want to see how I reason about search quality.
-- **Engineers new to search** who want to see BM25, embeddings and a blended ranker on real data.
+- Search product managers who need to explain to stakeholders what a ranking change is worth.
+- Hiring managers and interviewers who want to see how I reason about search quality.
+- Engineers new to search who want to see BM25, embeddings and a blended ranker on real data.
 
 ## Goals for v0.1.0
 
