@@ -2,7 +2,7 @@
 
 **Compare keyword, semantic and re-ranked product search side by side, scored against human relevance labels.**
 
-Live demo: [add the Render URL after the first deploy] · Current version: **v0.1.0** ([changelog](CHANGELOG.md))
+Live demo: [search-relevance-lab.onrender.com](https://search-relevance-lab.onrender.com) (free hosting: first load can take about a minute) · Current version: **v0.1.0** ([changelog](CHANGELOG.md))
 
 ![Compare view](docs/screenshots/compare-desktop.png)
 
