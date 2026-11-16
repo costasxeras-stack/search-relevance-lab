@@ -1,0 +1,12 @@
+{
+  "weights": {
+    "bm25": 0.4,
+    "cosine": 0.1,
+    "nameCoverage": 0.3,
+    "classCoverage": 0.2
+  },
+  "trainQueries": 288,
+  "trainNdcgAt10": 0.7448,
+  "method": "Grid search, step 0.1, weights sum to 1, objective mean nDCG@10 on train queries",
+  "trainedOn": "2026-11-16"
+}

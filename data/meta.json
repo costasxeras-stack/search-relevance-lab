@@ -1,0 +1,14 @@
+{
+  "source": "WANDS (Wayfair ANnotation Dataset), github.com/wayfair/WANDS, MIT licence",
+  "builtOn": "2026-11-16",
+  "products": 42994,
+  "queries": 480,
+  "labelRows": 233448,
+  "uniquePairs": 231873,
+  "duplicateRows": 1575,
+  "conflictingPairsDropped": 14,
+  "labelsKept": 231859,
+  "trainQueries": 288,
+  "testQueries": 192,
+  "embeddingModel": "Universal Sentence Encoder (EnergeticAI English embeddings), 512 dimensions"
+}

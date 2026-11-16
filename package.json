@@ -1,0 +1,21 @@
+{
+  "name": "search-relevance-lab",
+  "version": "0.1.0",
+  "description": "Compare keyword, semantic and re-ranked product search side by side, scored against human relevance labels.",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "build-data": "node scripts/build-data.mjs",
+    "train": "node scripts/train.mjs",
+    "evaluate": "node scripts/evaluate.mjs"
+  },
+  "engines": { "node": ">=18" },
+  "license": "MIT",
+  "dependencies": {
+    "@energetic-ai/core": "^0.2.0",
+    "@energetic-ai/embeddings": "^0.2.0",
+    "@energetic-ai/model-embeddings-en": "^0.2.0",
+    "express": "^4.21.2"
+  }
+}
