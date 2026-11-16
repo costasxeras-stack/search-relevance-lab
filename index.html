@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Search Relevance Lab</title>
+<style>
+  :root { --ink:#1b1f24; --muted:#5d6670; --line:#dfe3e8; --bg:#f6f5f1; --card:#fff; --accent:#0b5c5c;
+          --exact:#1c6b3a; --exact-bg:#e2f3e8; --partial:#8a5a00; --partial-bg:#fbeecd; --irr:#9b2c2c; --irr-bg:#fbe3e3; --none:#5d6670; --none-bg:#eceef1; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; color:var(--ink); background:var(--bg); }
+  a { color:var(--accent); }
+  header { background:var(--card); border-bottom:1px solid var(--line); }
+  .wrap { max-width:1180px; margin:0 auto; padding:0 16px; }
+  .top { display:flex; align-items:center; justify-content:space-between; gap:12px; padding-top:14px; padding-bottom:14px; flex-wrap:wrap; }
+  .brand { font-weight:700; font-size:18px; letter-spacing:-.01em; }
+  nav a { margin-right:16px; text-decoration:none; font-weight:600; font-size:15px; }
+  nav a:last-child { margin-right:0; }
+  nav a.on { color:var(--ink); border-bottom:2px solid var(--accent); padding-bottom:2px; }
+  h1 { font-size:26px; line-height:1.2; margin:28px 0 6px; letter-spacing:-.02em; }
+  .lede { color:var(--muted); margin:0 0 20px; max-width:70ch; }
+  form { display:flex; gap:8px; flex-wrap:wrap; }
+  input[type=search] { flex:1 1 260px; min-width:0; padding:12px 14px; font:inherit; border:1px solid #b9c0c8; border-radius:8px; background:#fff; }
+  button, select { font:inherit; padding:12px 16px; border-radius:8px; border:1px solid #b9c0c8; background:#fff; color:var(--ink); }
+  button.go { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; cursor:pointer; }
+  select { flex:1 1 220px; min-width:0; max-width:100%; }
+  input:focus-visible, button:focus-visible, select:focus-visible, a:focus-visible { outline:3px solid #7fc4c4; outline-offset:2px; }
+  .status { margin:16px 0 0; padding:10px 14px; border-radius:8px; background:#e9f1f1; font-size:15px; }
+  .status.warn { background:var(--partial-bg); }
+  .tabs { display:none; margin-top:16px; border:1px solid var(--line); border-radius:8px; overflow:hidden; background:#fff; }
+  .tabs button { flex:1; border:0; border-radius:0; padding:10px 6px; font-size:14px; font-weight:600; background:#fff; color:var(--muted); cursor:pointer; }
+  .tabs button[aria-selected=true] { background:var(--accent); color:#fff; }
+  .cols { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; margin:16px 0 28px; }
+  .col { background:var(--card); border:1px solid var(--line); border-radius:10px; min-width:0; }
+  .col h2 { font-size:16px; margin:0; }
+  .colhead { padding:14px 14px 10px; border-bottom:1px solid var(--line); }
+  .how { color:var(--muted); font-size:13px; margin:2px 0 8px; }
+  .metric { display:flex; gap:14px; font-size:13px; color:var(--muted); flex-wrap:wrap; }
+  .metric b { color:var(--ink); font-size:15px; font-variant-numeric:tabular-nums; }
+  ol { list-style:none; margin:0; padding:0; }
+  li.r { display:grid; grid-template-columns:22px 1fr; gap:6px; padding:10px 14px; border-bottom:1px solid #eef0f2; }
+  li.r:last-child { border-bottom:0; }
+  .rank { color:var(--muted); font-size:13px; font-variant-numeric:tabular-nums; padding-top:2px; }
+  .name { font-size:14.5px; line-height:1.35; overflow-wrap:anywhere; }
+  .sub { font-size:12.5px; color:var(--muted); margin-top:3px; display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .chip { font-size:12px; font-weight:600; padding:1px 8px; border-radius:99px; white-space:nowrap; }
+  .g2 { color:var(--exact); background:var(--exact-bg); } .g1 { color:var(--partial); background:var(--partial-bg); }
+  .g0 { color:var(--irr); background:var(--irr-bg); } .gn { color:var(--none); background:var(--none-bg); }
+  .empty { padding:22px 14px; color:var(--muted); font-size:14.5px; }
+  .empty b { display:block; color:var(--ink); margin-bottom:4px; }
+  section.notes { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:18px; margin:0 0 28px; }
+  section.notes h2 { font-size:17px; margin:0 0 8px; }
+  section.notes p, section.notes li { font-size:15px; max-width:80ch; }
+  section.notes ul { padding-left:20px; margin:8px 0; }
+  footer { color:var(--muted); font-size:13.5px; padding:0 0 32px; }
+  @media (max-width:820px) {
+    h1 { font-size:22px; }
+    .tabs { display:flex; }
+    .cols { grid-template-columns:1fr; }
+    .cols.ready .col { display:none; } .cols.ready .col.show { display:block; }
+  }
+</style>
+</head>
+<body>
+<header><div class="wrap top">
+  <div class="brand">Search Relevance Lab</div>
+  <nav><a class="on" href="/">Compare</a><a href="/scorecard">Scorecard</a></nav>
+</div></header>
+
+<main class="wrap">
+  <h1>One query, three ways to rank it</h1>
+  <p class="lede">Search a furniture and home catalog of <span id="nProducts">about 43,000</span> products. Each method returns its top 10. For queries that people have labelled by hand, every result shows its label and each method gets a score.</p>
+
+  <form id="f">
+    <input type="search" id="q" name="q" aria-label="Search query" placeholder="Type a product search" autocomplete="off" maxlength="120">
+    <button class="go" type="submit">Search</button>
+    <select id="pick" aria-label="Pick a labelled query"><option value="">Pick a labelled query</option></select>
+  </form>
+
+  <div id="status" class="status" hidden></div>
+
+  <div class="tabs" id="tabs" role="tablist" hidden>
+    <button role="tab" data-m="keyword" aria-selected="true">Keyword</button>
+    <button role="tab" data-m="semantic" aria-selected="false">Semantic</button>
+    <button role="tab" data-m="reranked" aria-selected="false">Re-ranked</button>
+  </div>
+
+  <div class="cols" id="cols" hidden>
+    <div class="col show" data-m="keyword"><div class="colhead"><h2>Keyword</h2><p class="how">BM25. Every word in the query must appear.</p><div class="metric" id="m-keyword"></div></div><ol id="l-keyword"></ol></div>
+    <div class="col" data-m="semantic"><div class="colhead"><h2>Semantic</h2><p class="how">Sentence embeddings. Closest meaning wins.</p><div class="metric" id="m-semantic"></div></div><ol id="l-semantic"></ol></div>
+    <div class="col" data-m="reranked"><div class="colhead"><h2>Re-ranked</h2><p class="how">Blend of keyword and semantic signals with learned weights.</p><div class="metric" id="m-reranked"></div></div><ol id="l-reranked"></ol></div>
+  </div>
+
+  <section class="notes">
+    <h2>How to read this</h2>
+    <ul>
+      <li><b>Labels</b> come from the open WANDS dataset: people rated products for 480 queries as Exact, Partial or Irrelevant.</li>
+      <li><b>Not labelled</b> means nobody rated that product for that query. It counts as zero in the score, so a method can lose points for showing a good product that was never rated.</li>
+      <li><b>nDCG@10</b> runs from 0 to 1. It rewards putting Exact matches at the top of the first ten results.</li>
+      <li>Queries you type yourself have no labels, so they show results without a score.</li>
+    </ul>
+    <p>The <a href="/scorecard">scorecard</a> has the totals across all labelled queries and the data caveats.</p>
+  </section>
+
+  <footer>Data: WANDS (Wayfair ANnotation Dataset), MIT licence. This is a portfolio demo and not a shop. <span id="ver"></span></footer>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const METHODS = ["keyword", "semantic", "reranked"];
+const LABEL = { 2: ["Exact", "g2"], 1: ["Partial", "g1"], 0: ["Irrelevant", "g0"] };
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+function setTab(m) {
+  document.querySelectorAll("#tabs button").forEach((b) => b.setAttribute("aria-selected", b.dataset.m === m));
+  document.querySelectorAll(".col").forEach((c) => c.classList.toggle("show", c.dataset.m === m));
+}
+document.querySelectorAll("#tabs button").forEach((b) => b.addEventListener("click", () => setTab(b.dataset.m)));
+
+function status(text, warn) { const s = $("status"); s.hidden = !text; s.textContent = text || ""; s.classList.toggle("warn", !!warn); }
+
+function render(d) {
+  for (const m of METHODS) {
+    const r = d[m];
+    const bits = [];
+    if (r.ndcg !== null && r.ndcg !== undefined) bits.push(`<span>nDCG@10 <b>${r.ndcg.toFixed(2)}</b></span>`);
+    if (m === "keyword") bits.push(`<span>Matches <b>${r.total.toLocaleString("en")}</b></span>`);
+    $("m-" + m).innerHTML = bits.join("");
+    $("l-" + m).innerHTML = r.results.length
+      ? r.results.map((x, i) => {
+          let chip = "";
+          if (d.labelled) { const [t, c] = x.label === null ? ["Not labelled", "gn"] : LABEL[x.label]; chip = `<span class="chip ${c}">${t}</span>`; }
+          return `<li class="r"><span class="rank">${i + 1}</span><div><div class="name">${esc(x.name)}</div><div class="sub">${chip}<span>${esc(x.cls || "No class")}</span></div></div></li>`;
+        }).join("")
+      : `<li class="empty"><b>No results</b>No product contains every word in this query. A shopper would see an empty page here.</li>`;
+  }
+  $("cols").hidden = false; $("cols").classList.add("ready"); $("tabs").hidden = false;
+  status(d.labelled
+    ? `This query has ${d.labelled.labels.toLocaleString("en")} human labels and belongs to the ${d.labelled.split} set.`
+    : "Nobody has labelled this query, so the results below have no scores.");
+}
+
+let seq = 0;
+async function run(q, push) {
+  q = q.trim(); if (!q) return;
+  $("q").value = q;
+  const mine = ++seq;
+  status("Searching…");
+  try {
+    const res = await fetch("/api/search?q=" + encodeURIComponent(q));
+    const d = await res.json();
+    if (mine !== seq) return;
+    if (!res.ok) { status(d.error || "Something went wrong. Try again.", true); return; }
+    render(d);
+    if (push) history.pushState({}, "", "?q=" + encodeURIComponent(q));
+  } catch { if (mine === seq) status("Could not reach the server. It may be waking up, so try again in a minute.", true); }
+}
+
+$("f").addEventListener("submit", (e) => { e.preventDefault(); $("pick").value = ""; run($("q").value, true); });
+$("pick").addEventListener("change", (e) => { if (e.target.value) run(e.target.value, true); });
+addEventListener("popstate", () => { const q = new URLSearchParams(location.search).get("q"); if (q) run(q, false); });
+
+fetch("/api/queries").then((r) => r.json()).then((qs) => {
+  qs.sort((a, b) => a.q.localeCompare(b.q));
+  $("pick").insertAdjacentHTML("beforeend", qs.map((x) => `<option value="${esc(x.q)}">${esc(x.q)}</option>`).join(""));
+});
+fetch("/api/meta").then((r) => r.json()).then((m) => { $("nProducts").textContent = m.products.toLocaleString("en"); $("ver").textContent = "v" + m.version; });
+const q0 = new URLSearchParams(location.search).get("q"); if (q0) run(q0, false);
+</script>
+</body>
+</html>

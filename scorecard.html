@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scorecard · Search Relevance Lab</title>
+<style>
+  :root { --ink:#1b1f24; --muted:#5d6670; --line:#dfe3e8; --bg:#f6f5f1; --card:#fff; --accent:#0b5c5c; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; color:var(--ink); background:var(--bg); }
+  a { color:var(--accent); }
+  header { background:var(--card); border-bottom:1px solid var(--line); }
+  .wrap { max-width:1180px; margin:0 auto; padding:0 16px; }
+  .top { display:flex; align-items:center; justify-content:space-between; gap:12px; padding-top:14px; padding-bottom:14px; flex-wrap:wrap; }
+  .brand { font-weight:700; font-size:18px; letter-spacing:-.01em; }
+  nav a { margin-right:16px; text-decoration:none; font-weight:600; font-size:15px; }
+  nav a:last-child { margin-right:0; }
+  nav a.on { color:var(--ink); border-bottom:2px solid var(--accent); padding-bottom:2px; }
+  h1 { font-size:26px; line-height:1.2; margin:28px 0 6px; letter-spacing:-.02em; }
+  h2 { font-size:18px; margin:0 0 6px; }
+  .lede { color:var(--muted); margin:0 0 20px; max-width:72ch; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:18px; margin:0 0 18px; }
+  .card p, .card li { font-size:15px; max-width:82ch; }
+  .card ul { padding-left:20px; margin:8px 0; }
+  .scroll { overflow-x:auto; }
+  table { border-collapse:collapse; width:100%; font-size:14.5px; }
+  th, td { text-align:left; padding:9px 10px; border-bottom:1px solid #eef0f2; vertical-align:top; }
+  th { font-size:13px; color:var(--muted); font-weight:600; white-space:nowrap; }
+  td.n, th.n { text-align:right; font-variant-numeric:tabular-nums; }
+  tr.best td { font-weight:600; }
+  #summary td:first-child { min-width:170px; }
+  .bar { height:6px; background:#e6e9ec; border-radius:3px; margin-top:5px; min-width:60px; }
+  .bar i { display:block; height:6px; background:var(--accent); border-radius:3px; }
+  .controls { display:flex; gap:8px; flex-wrap:wrap; margin:10px 0; }
+  select, input { font:inherit; padding:9px 12px; border:1px solid #b9c0c8; border-radius:8px; background:#fff; min-width:0; }
+  input { flex:1 1 180px; } select { flex:1 1 180px; max-width:100%; }
+  select:focus-visible, input:focus-visible, a:focus-visible, th button:focus-visible { outline:3px solid #7fc4c4; outline-offset:2px; }
+  th button { font:inherit; font-weight:600; color:inherit; background:none; border:0; padding:0; cursor:pointer; }
+  th button[aria-pressed=true] { color:var(--ink); text-decoration:underline; }
+  .small { font-size:13.5px; color:var(--muted); }
+  footer { color:var(--muted); font-size:13.5px; padding:0 0 32px; }
+  @media (max-width:820px) { h1 { font-size:22px; } }
+</style>
+</head>
+<body>
+<header><div class="wrap top">
+  <div class="brand">Search Relevance Lab</div>
+  <nav><a href="/">Compare</a><a class="on" href="/scorecard">Scorecard</a></nav>
+</div></header>
+
+<main class="wrap">
+  <h1>Scorecard</h1>
+  <p class="lede">Every method scored on the same held-out queries against the same human labels. The numbers on this page are read from a file produced by <code>npm run evaluate</code>, so they match the code in the repo.</p>
+
+  <div class="card">
+    <h2>Test set results</h2>
+    <p class="small" id="testNote"></p>
+    <div class="scroll"><table id="summary"></table></div>
+  </div>
+
+  <div class="card">
+    <h2>What the numbers say, and what they don't</h2>
+    <ul id="reading"></ul>
+  </div>
+
+  <div class="card">
+    <h2>Data and caveats</h2>
+    <ul id="data"></ul>
+  </div>
+
+  <div class="card">
+    <h2>Every labelled query</h2>
+    <div class="controls">
+      <select id="split" aria-label="Which queries to show">
+        <option value="test">Test queries</option><option value="train">Train queries</option><option value="all">All queries</option>
+      </select>
+      <select id="filter" aria-label="Filter queries">
+        <option value="">All rows</option>
+        <option value="zero">Keyword returns nothing</option>
+        <option value="rrwin">Re-ranked beats any-word keyword</option>
+        <option value="rrlose">Re-ranked loses to any-word keyword</option>
+        <option value="semwin">Semantic beats any-word keyword</option>
+      </select>
+      <input id="find" type="search" placeholder="Filter by text" aria-label="Filter by text">
+    </div>
+    <p class="small" id="count"></p>
+    <div class="scroll"><table id="rows"></table></div>
+  </div>
+
+  <footer>Data: WANDS (Wayfair ANnotation Dataset), MIT licence. <span id="ver"></span></footer>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const NAMES = { keyword: "Keyword, every word must match", keywordAny: "Keyword, any word may match", semantic: "Semantic", reranked: "Re-ranked blend" };
+const SHORT = { keyword: "Keyword", keywordAny: "Any-word", semantic: "Semantic", reranked: "Re-ranked" };
+const ORDER = ["keyword", "keywordAny", "semantic", "reranked"];
+const f2 = (v) => (v === null ? "n/a" : v.toFixed(2));
+const pct = (v) => (v === null ? "n/a" : Math.round(v * 100) + "%");
+let E, sortKey = "q", sortDir = 1;
+
+function summary() {
+  const t = E.test, best = Math.max(...ORDER.map((m) => t[m].ndcgAt10));
+  $("testNote").textContent = `${t.queries} test queries that were never used to tune the blend. Scored on ${E.evaluatedOn}.`;
+  $("summary").innerHTML = `<tr><th>Method</th><th class="n">nDCG@10</th><th class="n">No results</th><th class="n">Labelled in top 10</th></tr>` +
+    ORDER.map((m) => `<tr class="${t[m].ndcgAt10 === best ? "best" : ""}"><td>${NAMES[m]}<div class="bar"><i style="width:${t[m].ndcgAt10 * 100}%"></i></div></td><td class="n">${t[m].ndcgAt10.toFixed(3)}</td><td class="n">${t[m].zeroResultQueries} of ${t.queries}</td><td class="n">${pct(t[m].judgedShareOfTop10)}</td></tr>`).join("");
+
+  const rows = E.perQuery.filter((r) => r.split === "test");
+  const cmp = (a, b) => rows.reduce((o, r) => { const d = r[a].ndcg - r[b].ndcg; d > 0.001 ? o.w++ : d < -0.001 ? o.l++ : o.t++; return o; }, { w: 0, l: 0, t: 0 });
+  const rr = cmp("reranked", "keywordAny");
+  const w = E.weights;
+  $("reading").innerHTML = [
+    `Strict keyword search returns nothing for ${t.keyword.zeroResultQueries} of ${t.queries} test queries. Letting any word match fixes almost all of them and lifts nDCG@10 from ${t.keyword.ndcgAt10.toFixed(3)} to ${t.keywordAny.ndcgAt10.toFixed(3)}.`,
+    `The re-ranked blend scores ${t.reranked.ndcgAt10.toFixed(3)}. Against any-word keyword search it wins on ${rr.w} queries, loses on ${rr.l} and ties on ${rr.t}. Most of the gain over strict keyword search comes from relaxing the match rule, and the blend adds a smaller step on top.`,
+    `Semantic search alone scores ${t.semantic.ndcgAt10.toFixed(3)}, but only ${pct(t.semantic.judgedShareOfTop10)} of its top-10 results have a label. Unlabelled results count as zero, so this score is a floor and not a fair measure of semantic quality.`,
+    `Learned weights: keyword score ${w.bm25}, embedding similarity ${w.cosine}, query words in the product name ${w.nameCoverage}, query words in the product class ${w.classCoverage}. They were tuned on the ${E.train.queries} train queries only.`,
+  ].map((x) => `<li>${x}</li>`).join("");
+}
+
+function table() {
+  const split = $("split").value, flt = $("filter").value, text = $("find").value.trim().toLowerCase();
+  let rows = E.perQuery.filter((r) => (split === "all" || r.split === split) && (!text || r.q.toLowerCase().includes(text)));
+  const d = (r, a, b) => (r[a].ndcg ?? 0) - (r[b].ndcg ?? 0);
+  if (flt === "zero") rows = rows.filter((r) => r.keywordMatches === 0);
+  if (flt === "rrwin") rows = rows.filter((r) => d(r, "reranked", "keywordAny") > 0.001);
+  if (flt === "rrlose") rows = rows.filter((r) => d(r, "reranked", "keywordAny") < -0.001);
+  if (flt === "semwin") rows = rows.filter((r) => d(r, "semantic", "keywordAny") > 0.001);
+  const val = (r) => (sortKey === "q" ? r.q : sortKey === "matches" ? r.keywordMatches : r[sortKey].ndcg ?? -1);
+  rows.sort((a, b) => (val(a) > val(b) ? 1 : val(a) < val(b) ? -1 : 0) * sortDir);
+  $("count").textContent = `${rows.length} queries shown. Tap a query to open it in the comparison view. Tap a column name to sort.`;
+  const th = (k, label, n) => `<th class="${n ? "n" : ""}"><button data-k="${k}" aria-pressed="${sortKey === k}">${label}</button></th>`;
+  $("rows").innerHTML = `<tr>${th("q", "Query")}${th("matches", "Strict matches", 1)}${ORDER.map((m) => th(m, SHORT[m], 1)).join("")}</tr>` +
+    rows.map((r) => `<tr><td><a href="/?q=${encodeURIComponent(r.q)}">${esc(r.q)}</a></td><td class="n">${r.keywordMatches.toLocaleString("en")}</td>${ORDER.map((m) => `<td class="n">${f2(r[m].ndcg)}</td>`).join("")}</tr>`).join("");
+  document.querySelectorAll("#rows th button").forEach((b) => b.addEventListener("click", () => {
+    if (sortKey === b.dataset.k) sortDir = -sortDir; else { sortKey = b.dataset.k; sortDir = sortKey === "q" ? 1 : -1; }
+    table();
+  }));
+}
+
+Promise.all([fetch("/api/eval").then((r) => r.json()), fetch("/api/meta").then((r) => r.json())]).then(([e, m]) => {
+  E = e;
+  $("ver").textContent = "v" + m.version;
+  const n = (x) => x.toLocaleString("en");
+  $("data").innerHTML = [
+    `Catalog: ${n(m.products)} products from the open WANDS dataset. Queries: ${n(m.queries)}, split into ${m.trainQueries} train and ${m.testQueries} test by a fixed rule on the query ID.`,
+    `Labels: ${n(m.labelRows)} rows in the source file. ${n(m.duplicateRows)} were repeats of the same query and product. ${m.conflictingPairsDropped} query and product pairs carried two different labels and were left out. ${n(m.labelsKept)} labels are used.`,
+    `Gains: Exact 2, Partial 1, Irrelevant 0. A product with no label for a query counts as 0.`,
+    `One train query has no Exact or Partial label at all, so it cannot be scored and is left out of the train average.`,
+    `The catalog is furniture and home goods. Results may not carry over to other catalogs.`,
+  ].map((x) => `<li>${x}</li>`).join("");
+  summary(); table();
+});
+["split", "filter"].forEach((id) => $(id).addEventListener("change", table));
+$("find").addEventListener("input", table);
+</script>
+</body>
+</html>
