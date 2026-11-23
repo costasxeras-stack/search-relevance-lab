@@ -1,6 +1,6 @@
 {
   "name": "search-relevance-lab",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Compare keyword, semantic and re-ranked product search side by side, scored against human relevance labels.",
   "main": "server.js",
   "type": "module",
@@ -10,7 +10,9 @@
     "train": "node scripts/train.mjs",
     "evaluate": "node scripts/evaluate.mjs"
   },
-  "engines": { "node": ">=18" },
+  "engines": {
+    "node": ">=18"
+  },
   "license": "MIT",
   "dependencies": {
     "@energetic-ai/core": "^0.2.0",

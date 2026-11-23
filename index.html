@@ -4,80 +4,120 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Search Relevance Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wdth,wght@75..100,400..700&display=swap" rel="stylesheet">
 <style>
-  :root { --ink:#1b1f24; --muted:#5d6670; --line:#dfe3e8; --bg:#f6f5f1; --card:#fff; --accent:#0b5c5c;
-          --exact:#1c6b3a; --exact-bg:#e2f3e8; --partial:#8a5a00; --partial-bg:#fbeecd; --irr:#9b2c2c; --irr-bg:#fbe3e3; --none:#5d6670; --none-bg:#eceef1; }
+  :root { --ink:#1f2328; --muted:#59616b; --faint:#8a929b; --line:#e1e4e7; --bg:#f7f8f8; --card:#fff; --walnut:#6b4226; --walnut-2:#55331c;
+          --exact:#2f7d4a; --partial:#d89a1e; --irr:#c2412d; --none:#c9cdd2;
+          --exact-ink:#256b3d; --partial-ink:#8a5d00; --irr-ink:#a83524; }
   * { box-sizing:border-box; }
-  body { margin:0; font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; color:var(--ink); background:var(--bg); }
-  a { color:var(--accent); }
+  body { margin:0; font:16px/1.5 "Instrument Sans",system-ui,sans-serif; color:var(--ink); background:var(--bg); -webkit-font-smoothing:antialiased; }
+  a { color:var(--walnut); }
+  .wrap { max-width:1180px; margin:0 auto; padding:0 18px; }
   header { background:var(--card); border-bottom:1px solid var(--line); }
-  .wrap { max-width:1180px; margin:0 auto; padding:0 16px; }
-  .top { display:flex; align-items:center; justify-content:space-between; gap:12px; padding-top:14px; padding-bottom:14px; flex-wrap:wrap; }
-  .brand { font-weight:700; font-size:18px; letter-spacing:-.01em; }
-  nav a { margin-right:16px; text-decoration:none; font-weight:600; font-size:15px; }
-  nav a:last-child { margin-right:0; }
-  nav a.on { color:var(--ink); border-bottom:2px solid var(--accent); padding-bottom:2px; }
-  h1 { font-size:26px; line-height:1.2; margin:28px 0 6px; letter-spacing:-.02em; }
-  .lede { color:var(--muted); margin:0 0 20px; max-width:70ch; }
-  form { display:flex; gap:8px; flex-wrap:wrap; }
-  input[type=search] { flex:1 1 260px; min-width:0; padding:12px 14px; font:inherit; border:1px solid #b9c0c8; border-radius:8px; background:#fff; }
-  button, select { font:inherit; padding:12px 16px; border-radius:8px; border:1px solid #b9c0c8; background:#fff; color:var(--ink); }
-  button.go { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; cursor:pointer; }
-  select { flex:1 1 220px; min-width:0; max-width:100%; }
-  input:focus-visible, button:focus-visible, select:focus-visible, a:focus-visible { outline:3px solid #7fc4c4; outline-offset:2px; }
-  .status { margin:16px 0 0; padding:10px 14px; border-radius:8px; background:#e9f1f1; font-size:15px; }
-  .status.warn { background:var(--partial-bg); }
-  .tabs { display:none; margin-top:16px; border:1px solid var(--line); border-radius:8px; overflow:hidden; background:#fff; }
-  .tabs button { flex:1; border:0; border-radius:0; padding:10px 6px; font-size:14px; font-weight:600; background:#fff; color:var(--muted); cursor:pointer; }
-  .tabs button[aria-selected=true] { background:var(--accent); color:#fff; }
-  .cols { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; margin:16px 0 28px; }
-  .col { background:var(--card); border:1px solid var(--line); border-radius:10px; min-width:0; }
-  .col h2 { font-size:16px; margin:0; }
-  .colhead { padding:14px 14px 10px; border-bottom:1px solid var(--line); }
-  .how { color:var(--muted); font-size:13px; margin:2px 0 8px; }
-  .metric { display:flex; gap:14px; font-size:13px; color:var(--muted); flex-wrap:wrap; }
-  .metric b { color:var(--ink); font-size:15px; font-variant-numeric:tabular-nums; }
+  .top { display:flex; align-items:center; justify-content:space-between; gap:12px; height:56px; }
+  .brand { font-weight:700; font-size:17px; font-stretch:85%; letter-spacing:.01em; display:flex; align-items:center; gap:8px; white-space:nowrap; }
+  .brand i { display:inline-flex; gap:2px; }
+  .brand i b { width:5px; height:14px; border-radius:1px; }
+  nav { display:flex; gap:4px; }
+  nav a { text-decoration:none; font-weight:600; font-size:15px; color:var(--muted); padding:7px 12px; border-radius:6px; }
+  nav a.on { color:var(--ink); background:var(--bg); }
+  .hero { text-align:center; padding:52px 0 26px; }
+  h1 { font-size:clamp(28px,4vw,42px); line-height:1.08; margin:0 auto; font-weight:700; font-stretch:88%; letter-spacing:-.01em; max-width:26ch; text-wrap:balance; }
+  .lede { color:var(--muted); margin:12px auto 0; max-width:62ch; }
+  form { display:flex; max-width:720px; margin:26px auto 0; background:#fff; border:2px solid var(--ink); border-radius:40px; overflow:hidden; }
+  input[type=search] { flex:1; min-width:0; padding:16px 22px; font:inherit; font-size:18px; border:0; background:transparent; color:var(--ink); }
+  input[type=search]:focus { outline:none; }
+  form:focus-within { box-shadow:0 0 0 4px #e9ddd2; }
+  button.go { font:inherit; font-weight:600; font-size:16px; padding:0 26px; border:0; background:var(--walnut); color:#fff; cursor:pointer; }
+  button.go:hover { background:var(--walnut-2); }
+  .pickrow { margin:14px auto 0; display:flex; justify-content:center; align-items:center; gap:8px; flex-wrap:wrap; font-size:15px; color:var(--muted); }
+  select { font:inherit; font-size:15px; padding:8px 12px; border:1px solid var(--line); border-radius:8px; background:#fff; color:var(--ink); max-width:100%; }
+  button:focus-visible, select:focus-visible, a:focus-visible { outline:3px solid var(--partial); outline-offset:2px; }
+  .status { margin:22px auto 0; text-align:center; font-size:15px; color:var(--muted); max-width:70ch; }
+  .status.warn { color:var(--irr-ink); }
+  /* relevance strip */
+  .strip { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:18px 20px; margin:22px 0 0; }
+  .strip-row { display:grid; grid-template-columns:110px 1fr 110px; align-items:center; gap:14px; padding:6px 0; }
+  .strip-row b { font-size:15px; }
+  .tiles { display:grid; grid-template-columns:repeat(10,1fr); gap:5px; }
+  .tiles span { aspect-ratio:1.6; border-radius:4px; background:var(--none); position:relative; }
+  .tiles span.g2 { background:var(--exact); } .tiles span.g1 { background:var(--partial); } .tiles span.g0 { background:var(--irr); }
+  .tiles span.gx { background:transparent; border:1px dashed var(--none); }
+  .strip-row .score { text-align:right; font-variant-numeric:tabular-nums; font-size:14px; color:var(--muted); }
+  .strip-row .score strong { display:block; font-size:22px; color:var(--ink); line-height:1.1; }
+  .strip-foot { display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-top:10px; font-size:13px; color:var(--muted); padding-left:124px; }
+  .key { display:flex; gap:14px; flex-wrap:wrap; }
+  .key i { display:inline-block; width:12px; height:8px; border-radius:2px; margin-right:5px; vertical-align:1px; }
+  /* result columns */
+  .tabs { display:none; margin-top:18px; border-bottom:2px solid var(--line); }
+  .tabs button { flex:1; border:0; padding:10px 6px; font:inherit; font-size:15px; font-weight:600; background:none; color:var(--muted); cursor:pointer; border-bottom:3px solid transparent; margin-bottom:-2px; }
+  .tabs button[aria-selected=true] { color:var(--ink); border-bottom-color:var(--walnut); }
+  .cols { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:22px; margin:22px 0 36px; }
+  .col { min-width:0; }
+  .col h2 { font-size:19px; margin:0; font-stretch:88%; }
+  .colhead { padding:0 0 10px; border-bottom:2px solid var(--ink); }
+  .how { color:var(--muted); font-size:13.5px; margin:2px 0 6px; }
+  .metric { display:flex; gap:14px; font-size:13.5px; color:var(--muted); flex-wrap:wrap; }
+  .metric b { color:var(--ink); font-variant-numeric:tabular-nums; }
   ol { list-style:none; margin:0; padding:0; }
-  li.r { display:grid; grid-template-columns:22px 1fr; gap:6px; padding:10px 14px; border-bottom:1px solid #eef0f2; }
-  li.r:last-child { border-bottom:0; }
-  .rank { color:var(--muted); font-size:13px; font-variant-numeric:tabular-nums; padding-top:2px; }
-  .name { font-size:14.5px; line-height:1.35; overflow-wrap:anywhere; }
-  .sub { font-size:12.5px; color:var(--muted); margin-top:3px; display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
-  .chip { font-size:12px; font-weight:600; padding:1px 8px; border-radius:99px; white-space:nowrap; }
-  .g2 { color:var(--exact); background:var(--exact-bg); } .g1 { color:var(--partial); background:var(--partial-bg); }
-  .g0 { color:var(--irr); background:var(--irr-bg); } .gn { color:var(--none); background:var(--none-bg); }
-  .empty { padding:22px 14px; color:var(--muted); font-size:14.5px; }
+  li.r { display:grid; grid-template-columns:4px 22px 1fr; gap:10px; padding:11px 0; border-bottom:1px solid var(--line); }
+  li.r::before { content:""; grid-row:1; grid-column:1; border-radius:2px; background:var(--lab,transparent); }
+  li.r.g2 { --lab:var(--exact); } li.r.g1 { --lab:var(--partial); } li.r.g0 { --lab:var(--irr); } li.r.gn { --lab:var(--none); }
+  .rank { color:var(--faint); font-size:13px; font-variant-numeric:tabular-nums; padding-top:2px; }
+  .name { font-size:15px; line-height:1.35; overflow-wrap:anywhere; }
+  .sub { font-size:13px; color:var(--muted); margin-top:3px; display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .chip { font-size:12.5px; font-weight:600; white-space:nowrap; }
+  .chip.g2 { color:var(--exact-ink); } .chip.g1 { color:var(--partial-ink); } .chip.g0 { color:var(--irr-ink); } .chip.gn { color:var(--faint); }
+  .empty { padding:22px 0; color:var(--muted); font-size:14.5px; }
   .empty b { display:block; color:var(--ink); margin-bottom:4px; }
-  section.notes { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:18px; margin:0 0 28px; }
-  section.notes h2 { font-size:17px; margin:0 0 8px; }
+  section.notes { border-top:2px solid var(--ink); padding:18px 0 0; margin:0 0 30px; }
+  section.notes h2 { font-size:19px; margin:0 0 8px; font-stretch:88%; }
   section.notes p, section.notes li { font-size:15px; max-width:80ch; }
   section.notes ul { padding-left:20px; margin:8px 0; }
   footer { color:var(--muted); font-size:13.5px; padding:0 0 32px; }
+  @media (max-width:420px) { .top { gap:6px; } nav { gap:0; } nav a { padding:6px 7px; font-size:14.5px; } .brand { font-size:15.5px; } }
+  @media (max-width:380px) { .brand i { display:none; } nav a { padding:6px 5px; } .wrap { padding:0 14px; } }
   @media (max-width:820px) {
-    h1 { font-size:22px; }
+    .hero { padding-top:32px; text-align:left; }
+    h1, .lede { margin-left:0; }
+    .pickrow { justify-content:flex-start; }
+    .status { text-align:left; margin-left:0; }
     .tabs { display:flex; }
     .cols { grid-template-columns:1fr; }
     .cols.ready .col { display:none; } .cols.ready .col.show { display:block; }
+    .strip { padding:14px; }
+    .strip-row { grid-template-columns:1fr auto; gap:6px 10px; }
+    .strip-row .tiles { grid-column:1 / -1; grid-row:2; }
+    .strip-row .score strong { display:inline; font-size:17px; margin-right:4px; }
+    .strip-foot { padding-left:0; }
+    input[type=search] { font-size:16px; padding:14px 16px; }
+    button.go { padding:0 18px; }
   }
 </style>
 </head>
 <body>
 <header><div class="wrap top">
-  <div class="brand">Search Relevance Lab</div>
+  <div class="brand"><i aria-hidden="true"><b style="background:var(--exact)"></b><b style="background:var(--partial)"></b><b style="background:var(--irr)"></b></i>Search Relevance Lab</div>
   <nav><a class="on" href="/">Compare</a><a href="/scorecard">Scorecard</a></nav>
 </div></header>
 
 <main class="wrap">
-  <h1>One query, three ways to rank it</h1>
-  <p class="lede">Search a furniture and home catalog of <span id="nProducts">about 43,000</span> products. Each method returns its top 10. For queries that people have labelled by hand, every result shows its label and each method gets a score.</p>
-
-  <form id="f">
-    <input type="search" id="q" name="q" aria-label="Search query" placeholder="Type a product search" autocomplete="off" maxlength="120">
-    <button class="go" type="submit">Search</button>
-    <select id="pick" aria-label="Pick a labelled query"><option value="">Pick a labelled query</option></select>
-  </form>
+  <section class="hero">
+    <h1>One query, three ways to rank it</h1>
+    <p class="lede">Search a furniture and home catalog of <span id="nProducts">about 43,000</span> products. Keyword, semantic and re-ranked search each return their top 10. For queries people have labelled, every result shows its label and each method gets a score.</p>
+    <form id="f" role="search">
+      <input type="search" id="q" name="q" aria-label="Search query" placeholder="Search the catalog" autocomplete="off" maxlength="120">
+      <button class="go" type="submit">Search</button>
+    </form>
+    <div class="pickrow"><label for="pick">Or try a query people labelled:</label> <select id="pick"><option value="">Choose one</option></select></div>
+  </section>
 
   <div id="status" class="status" hidden></div>
+
+  <section class="strip" id="strip" hidden aria-label="Labels of the top 10 results for each method">
+    <div id="strip-rows"></div>
+    <div class="strip-foot"><span>Rank 1 on the left, rank 10 on the right.</span><span class="key"><span><i style="background:var(--exact)"></i>Exact</span><span><i style="background:var(--partial)"></i>Partial</span><span><i style="background:var(--irr)"></i>Irrelevant</span><span><i style="background:var(--none)"></i>Not labelled</span></span></div>
+  </section>
 
   <div class="tabs" id="tabs" role="tablist" hidden>
     <button role="tab" data-m="keyword" aria-selected="true">Keyword</button>
@@ -130,11 +170,22 @@ function render(d) {
       ? r.results.map((x, i) => {
           let chip = "";
           if (d.labelled) { const [t, c] = x.label === null ? ["Not labelled", "gn"] : LABEL[x.label]; chip = `<span class="chip ${c}">${t}</span>`; }
-          return `<li class="r"><span class="rank">${i + 1}</span><div><div class="name">${esc(x.name)}</div><div class="sub">${chip}<span>${esc(x.cls || "No class")}</span></div></div></li>`;
+          const lc = d.labelled ? (x.label === null ? "gn" : LABEL[x.label][1]) : "";
+          return `<li class="r ${lc}"><span class="rank">${i + 1}</span><div><div class="name">${esc(x.name)}</div><div class="sub">${chip}<span>${esc(x.cls || "No class")}</span></div></div></li>`;
         }).join("")
       : `<li class="empty"><b>No results</b>No product contains every word in this query. A shopper would see an empty page here.</li>`;
   }
   $("cols").hidden = false; $("cols").classList.add("ready"); $("tabs").hidden = false;
+  if (d.labelled) {
+    const NAMES = { keyword: "Keyword", semantic: "Semantic", reranked: "Re-ranked" };
+    $("strip-rows").innerHTML = METHODS.map((m) => {
+      const r = d[m], tiles = [];
+      for (let i = 0; i < 10; i++) { const x = r.results[i]; tiles.push(`<span class="${!x ? "gx" : x.label === null ? "gn" : LABEL[x.label][1]}"></span>`); }
+      const sc = r.ndcg !== null && r.ndcg !== undefined ? `<strong>${r.ndcg.toFixed(2)}</strong>nDCG@10` : "";
+      return `<div class="strip-row"><b>${NAMES[m]}</b><div class="tiles">${tiles.join("")}</div><div class="score">${sc}</div></div>`;
+    }).join("");
+    $("strip").hidden = false;
+  } else { $("strip").hidden = true; }
   status(d.labelled
     ? `This query has ${d.labelled.labels.toLocaleString("en")} human labels and belongs to the ${d.labelled.split} set.`
     : "Nobody has labelled this query, so the results below have no scores.");
